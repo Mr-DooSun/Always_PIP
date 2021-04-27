@@ -1,43 +1,141 @@
 # On the back window shot
 import win32gui, win32ui, win32con, winxpgui
 from ctypes import windll
-from PIL import Image
-import cv2
-import numpy
+
+from PIL import Image # HPND
+
+import cv2 # MIT
+import numpy # BSD
 
 import os
 
-from PyQt5.QtWidgets import QMenuBar, QApplication, QWidget, QLabel, QPushButton, QMainWindow
+# GPL v3
+from PyQt5.QtWidgets import QMenuBar, QApplication, QWidget, QLabel, QPushButton, QMainWindow, QComboBox, QLineEdit, QMessageBox
 from PyQt5.QtCore import Qt,QRect,QMetaObject,QCoreApplication
-from PyQt5.QtGui import QMouseEvent, QCursor, QPixmap, QImage
+from PyQt5.QtGui import QMouseEvent, QCursor, QPixmap, QImage, QFont, QFontDatabase, QIcon
+
 import sys
-
 import threading
-
 from time import sleep
 
+Choose_Window = ""
+width = None
+height = None
+Start_pip = True
+
 class Main_MainWindow(QWidget):
+    def retranslateUi(self, MainWindow):
+        _translate = QCoreApplication.translate
+        MainWindow.setWindowTitle("PIP")
+        QApplication.setWindowIcon(QIcon('pip.ico'))
+        MainWindow.setFixedSize(200, 320)
+        
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.setFixedSize(200, 300)
         
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
         MainWindow.setCentralWidget(self.centralwidget)
 
+        # 배달의 민족 연성체
+        self.new_font = QFontDatabase()
+        self.new_font.addApplicationFont('BMYEONSUNG.ttf')
+
         #Title_Label
         self.Title_label = QLabel(self.centralwidget)
-        self.Title_label.setGeometry(QRect(0, 0, 100, 80))
+        self.Title_label.setGeometry(QRect(40, 15, 150, 40))
         self.Title_label.setObjectName("Title_label")
         self.Title_label.setText('Always PIP')
+        self.Title_label.setFont(QFont('배달의민족 연성',20))
 
-        # start_button
-        self.start_button = QPushButton(self.centralwidget)
-        self.start_button.setGeometry(QRect(50, 60, 75, 23))
-        self.start_button.setObjectName("start_button")
-        self.start_button.setText('START')
-        self.start_button.clicked.connect(self.start_click)
+        # 프로세스 확인 라벨
+        self.Process_check_label = QLabel(self.centralwidget)
+        self.Process_check_label.setGeometry(QRect(25,75, 100,20))
+        self.Process_check_label.setObjectName('Process_check_label')
+        self.Process_check_label.setText('Choose Process')
+        self.Process_check_label.setFont(QFont('배달의민족 연성',12))
+
+        # Qombo box 프로세스 확인
+        output = self.getWindowList()
+        process_list = []
+        for window_name,pid in output :
+            process_list.append(window_name)
+        self.qb = QComboBox(self.centralwidget)
+        self.qb.addItems(process_list)  # 다수 아이템 추가시
+        self.qb.setGeometry(QRect(25, 100, 150, 25))
+
+        # Width 라벨
+        self.Width_label = QLabel(self.centralwidget)
+        self.Width_label.setGeometry(QRect(25,145, 100,20))
+        self.Width_label.setObjectName('Width_label')
+        self.Width_label.setText('Width')
+        self.Width_label.setFont(QFont('배달의민족 연성',12))
+
+        # Width 입력칸
+        self.Width_text_edit = QLineEdit(self.centralwidget)
+        self.Width_text_edit.setGeometry(QRect(25, 170, 50, 25))
+        self.Width_text_edit.setObjectName("Width_text_edit")
+        self.Width_text_edit.setText("640")
+
+        # X 라벨
+        self.X_label = QLabel(self.centralwidget)
+        self.X_label.setGeometry(QRect(95,175, 100,20))
+        self.X_label.setObjectName('X_label')
+        self.X_label.setText('X')
+        self.X_label.setFont(QFont('배달의민족 연성',12))
+
+        # Height 라벨
+        self.Height_label = QLabel(self.centralwidget)
+        self.Height_label.setGeometry(QRect(125,145, 100,20))
+        self.Height_label.setObjectName('Height_label')
+        self.Height_label.setText('Height')
+        self.Height_label.setFont(QFont('배달의민족 연성',12))
+
+        # Height 입력 칸
+        self.Height_text_edit = QLineEdit(self.centralwidget)
+        self.Height_text_edit.setGeometry(QRect(125, 170, 50, 25))
+        self.Height_text_edit.setObjectName("Height_text_edit")
+        self.Height_text_edit.setText("360")
+
+        # 도움말
+        self.Help_button = QPushButton(self.centralwidget)
+        self.Help_button.setGeometry(QRect(15, 230, 20, 20))
+        self.Help_button.setObjectName("Help_button")
+        self.Help_button.setText('?')
+        self.Help_button.clicked.connect(self.Help_notice)
+
+
+        # 안내 라벨
+        self.comment_label = QLabel(self.centralwidget)
+        self.comment_label.setGeometry(QRect(35,210, 150,40))
+        self.comment_label.setObjectName('comment_label')
+        self.comment_label.setText('값을 조정 할 수 있습니다.\n  <- 도움말 필독 부탁드립니다.')
+        self.comment_label.setFont(QFont('배달의민족 연성',12))
+
+        # Start_button
+        self.Start_button = QPushButton(self.centralwidget)
+        self.Start_button.setGeometry(QRect(30, 265, 75, 30))
+        self.Start_button.setObjectName("Start_button")
+        self.Start_button.setText('START')
+        self.Start_button.setFont(QFont('배달의민족 연성',12))
+        self.Start_button.clicked.connect(self.start_click)
+
+        # 후원 버튼
+        self.Sponsor_button = QPushButton(self.centralwidget)
+        self.Sponsor_button.setGeometry(QRect(120, 265, 50, 30))
+        self.Sponsor_button.setObjectName("Sponsor_button")
+        self.Sponsor_button.setText('후원')
+        self.Sponsor_button.setFont(QFont('배달의민족 연성',12))
+        self.Sponsor_button.clicked.connect(self.Sponsor_notice)
+
+        # 출처
+        self.comment_label = QLabel(self.centralwidget)
+        self.comment_label.setGeometry(QRect(25,300, 150,20))
+        self.comment_label.setObjectName('comment_label')
+        self.comment_label.setText('mr-doosun.tistory.com')
+        self.comment_label.setFont(QFont('배달의민족 연성',12))
+
 
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setGeometry(QRect(0, 0, 800, 21))
@@ -48,24 +146,49 @@ class Main_MainWindow(QWidget):
         self.retranslateUi(MainWindow)
         QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, MainWindow):
-        _translate = QCoreApplication.translate
-        MainWindow.setWindowTitle("PIP")
+    def getWindowList(self):
+        def callback(hwnd, hwnd_list: list):
+            title = win32gui.GetWindowText(hwnd)
+
+            if win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd) and title:
+                hwnd_list.append((title, hwnd))
+            return True
+
+        output = []
+        win32gui.EnumWindows(callback, output)
+        
+        return output
 
     def start_click(self,MainWindow):
-        self.close()
+        global Start_pip
 
-        Sub_Window()
+        if Start_pip :
+            Start_pip = False
+            global Choose_Window, width, height
+            Choose_Window = self.qb.currentText()
+            print(self.Width_text_edit.text(),self.Height_text_edit.text())
+            width = int(self.Width_text_edit.text())
+            height = int(self.Height_text_edit.text())
+            Sub_Window()
+    
+    def Help_notice(self,Main_MainWindow):
+        QMessageBox.about(self,'도움말','후원')
 
+    def Sponsor_notice(self,Main_MainWindow):
+        QMessageBox.about(self,'후원','기업 - (ㅇㄷㅎ)')
+#
+#
+#
 
 class Sub_Window(QWidget):
     def __init__(self):
         super().__init__()
+        global width,height
         
         self.Running = True
 
-        self.width = 640
-        self.height = 360
+        self.width = width
+        self.height = height
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.resize(self.width, self.height)
         self.centralwidget = QWidget(self)
@@ -100,21 +223,26 @@ class Sub_Window(QWidget):
             QMouseEvent.accept()
 
     def mouseReleaseEvent(self, QMouseEvent):
+        global Choose_Window
+
         self.m_flag=False
         self.setCursor(QCursor(Qt.ArrowCursor))
-        hWnd = win32gui.FindWindow(None,"MapleStory")
+        hWnd = win32gui.FindWindow(None,Choose_Window)
         win32gui.SetForegroundWindow(hWnd)
 
 #=============================================================
 # Exit Button click event
     def Exit_button_click(self,MainWindow):
+        global Start_pip
+        Start_pip = True
         self.Running = False
 
         self.close()
 #============================================================
     def run(self,MainWindow):
+        global Choose_Window
         # Get a handle to the background of the window, pay attention to the background window can not be minimized
-        hWnd = win32gui.FindWindow(None,"MapleStory") # Window class name can get the SPY ++ using Visual Studio Tools
+        hWnd = win32gui.FindWindow(None,Choose_Window) # Window class name can get the SPY ++ using Visual Studio Tools
         
         win32gui.SetWindowLong (hWnd, win32con.GWL_EXSTYLE, win32gui.GetWindowLong (hWnd, win32con.GWL_EXSTYLE ) | win32con.WS_EX_LAYERED )
         winxpgui.SetLayeredWindowAttributes(hWnd, 0, 0, win32con.LWA_ALPHA)
