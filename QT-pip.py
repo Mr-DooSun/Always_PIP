@@ -98,20 +98,19 @@ class Main_MainWindow(QWidget):
         self.Height_text_edit.setObjectName("Height_text_edit")
         self.Height_text_edit.setText("360")
 
+        # 안내 라벨
+        self.comment_label = QLabel(self.centralwidget)
+        self.comment_label.setGeometry(QRect(35,190, 150,40))
+        self.comment_label.setObjectName('comment_label')
+        self.comment_label.setText('값을 조정 할 수 있습니다')
+        self.comment_label.setFont(QFont('배달의민족 연성',12))
+
         # 도움말
         self.Help_button = QPushButton(self.centralwidget)
-        self.Help_button.setGeometry(QRect(15, 230, 20, 20))
+        self.Help_button.setGeometry(QRect(90, 230, 20, 20))
         self.Help_button.setObjectName("Help_button")
         self.Help_button.setText('?')
         self.Help_button.clicked.connect(self.Help_notice)
-
-
-        # 안내 라벨
-        self.comment_label = QLabel(self.centralwidget)
-        self.comment_label.setGeometry(QRect(35,210, 150,40))
-        self.comment_label.setObjectName('comment_label')
-        self.comment_label.setText('값을 조정 할 수 있습니다.\n  <- 도움말 필독 부탁드립니다.')
-        self.comment_label.setFont(QFont('배달의민족 연성',12))
 
         # Start_button
         self.Start_button = QPushButton(self.centralwidget)
@@ -135,7 +134,6 @@ class Main_MainWindow(QWidget):
         self.comment_label.setObjectName('comment_label')
         self.comment_label.setText('mr-doosun.tistory.com')
         self.comment_label.setFont(QFont('배달의민족 연성',12))
-
 
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setGeometry(QRect(0, 0, 800, 21))
@@ -166,19 +164,20 @@ class Main_MainWindow(QWidget):
             Start_pip = False
             global Choose_Window, width, height
             Choose_Window = self.qb.currentText()
-            print(self.Width_text_edit.text(),self.Height_text_edit.text())
             width = int(self.Width_text_edit.text())
             height = int(self.Height_text_edit.text())
+
             Sub_Window()
     
     def Help_notice(self,Main_MainWindow):
-        QMessageBox.about(self,'도움말','후원')
+        os.system('explorer http://mr-doosun.tistory.com')
 
     def Sponsor_notice(self,Main_MainWindow):
-        QMessageBox.about(self,'후원','기업 - (ㅇㄷㅎ)')
-#
-#
-#
+        QMessageBox.about(self,'후원','(기업) 579-036026-01-013 [ㅇㄷㅎ]')
+
+# ==========================================================================
+# ==========================================================================
+# ==========================================================================
 
 class Sub_Window(QWidget):
     def __init__(self):
