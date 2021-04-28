@@ -168,9 +168,10 @@ class Main_MainWindow(QWidget):
             height = int(self.Height_text_edit.text())
 
             Sub_Window()
+                
     
     def Help_notice(self,Main_MainWindow):
-        os.system('explorer http://mr-doosun.tistory.com')
+        os.system('explorer http://mr-doosun.tistory.com/category/Always%20PIP')
 
     def Sponsor_notice(self,Main_MainWindow):
         QMessageBox.about(self,'후원','(기업) 579-036026-01-013 [ㅇㄷㅎ]')
@@ -196,7 +197,6 @@ class Sub_Window(QWidget):
         self.Picture = QLabel(self.centralwidget)
         self.Picture.setGeometry(QRect(0, 0, self.width, self.height))
         self.Picture.setObjectName("Picture")
-        self.Picture.setPixmap(QPixmap("im_opencv.png")) #image path
 
         self.Exit_button = QPushButton('Ｘ',self.centralwidget,)
         self.Exit_button.setGeometry(QRect(self.width-30,10,20,20))
@@ -232,11 +232,15 @@ class Sub_Window(QWidget):
 #=============================================================
 # Exit Button click event
     def Exit_button_click(self,MainWindow):
-        global Start_pip
+        global Start_pip,Choose_Window
         Start_pip = True
         self.Running = False
 
+        hWnd = win32gui.FindWindow(None,Choose_Window)
+        win32gui.SetWindowLong(hWnd, win32con.GWL_EXSTYLE, win32gui.GetWindowLong (hWnd, win32con.GWL_EXSTYLE ) | win32con.WS_EX_LAYERED )
+        winxpgui.SetLayeredWindowAttributes(hWnd, 0, 255, win32con.LWA_ALPHA)
         self.close()
+        
 #============================================================
     def run(self,MainWindow):
         global Choose_Window
@@ -244,8 +248,14 @@ class Sub_Window(QWidget):
         hWnd = win32gui.FindWindow(None,Choose_Window) # Window class name can get the SPY ++ using Visual Studio Tools
         
         win32gui.SetWindowLong (hWnd, win32con.GWL_EXSTYLE, win32gui.GetWindowLong (hWnd, win32con.GWL_EXSTYLE ) | win32con.WS_EX_LAYERED )
-        winxpgui.SetLayeredWindowAttributes(hWnd, 0, 0, win32con.LWA_ALPHA)
         
+        try :
+            winxpgui.SetLayeredWindowAttributes(hWnd, 0, 0, win32con.LWA_ALPHA)
+        except :
+            global Start_pip
+            self.Running=False
+            Start_pip = True
+
         while self.Running:
             # Get a handle to the window size information
             win32gui.MoveWindow(hWnd,0,0,self.width,self.height,0)
@@ -288,16 +298,13 @@ class Sub_Window(QWidget):
                 self.rgbImage = cv2.cvtColor(im_opencv, cv2.COLOR_BGRA2RGB)
                 self.convertToQtFormat = QImage(self.rgbImage.data, self.rgbImage.shape[1], self.rgbImage.shape[0], QImage.Format_RGB888)
                 self.pixmap = QPixmap(self.convertToQtFormat)
-                self.p = self.pixmap.scaled(640, 360, Qt.IgnoreAspectRatio)   
+                self.p = self.pixmap.scaled(self.width, self.height, Qt.IgnoreAspectRatio)   
 
                 self.Picture.setPixmap(self.p)
                 self.Picture.update()
 
             except Exception as e:
                 print(e)
-
-        win32gui.SetWindowLong(hWnd, win32con.GWL_EXSTYLE, win32gui.GetWindowLong (hWnd, win32con.GWL_EXSTYLE ) | win32con.WS_EX_LAYERED )
-        winxpgui.SetLayeredWindowAttributes(hWnd, 0, 255, win32con.LWA_ALPHA)
 
     def video_thread(self,):
         thread=threading.Thread(target=self.run,args=(self,))
