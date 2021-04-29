@@ -1,10 +1,9 @@
 # On the back window shot
 import win32gui, win32ui, win32con, winxpgui
-from ctypes import windll
 
 from PIL import Image # HPND
 
-import cv2 # MIT
+from cv2  import cvtColor,COLOR_BGRA2RGB # MIT
 import numpy # BSD
 
 import os
@@ -295,7 +294,7 @@ class Sub_Window(QWidget):
                 im_opencv = numpy.frombuffer(signedIntsArray, dtype = 'uint8')
                 im_opencv.shape = (self.height, self.width, 4)
 
-                self.rgbImage = cv2.cvtColor(im_opencv, cv2.COLOR_BGRA2RGB)
+                self.rgbImage = cvtColor(im_opencv, COLOR_BGRA2RGB)
                 self.convertToQtFormat = QImage(self.rgbImage.data, self.rgbImage.shape[1], self.rgbImage.shape[0], QImage.Format_RGB888)
                 self.pixmap = QPixmap(self.convertToQtFormat)
                 self.p = self.pixmap.scaled(self.width, self.height, Qt.IgnoreAspectRatio)   
