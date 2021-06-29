@@ -98,11 +98,11 @@ class Main_MainWindow(QWidget):
         self.Height_text_edit.setText("360")
 
         # 안내 라벨
-        self.comment_label = QLabel(self.centralwidget)
-        self.comment_label.setGeometry(QRect(35,190, 150,40))
-        self.comment_label.setObjectName('comment_label')
-        self.comment_label.setText('값을 조정 할 수 있습니다')
-        self.comment_label.setFont(QFont('배달의민족 연성',12))
+        self.Comment_label = QLabel(self.centralwidget)
+        self.Comment_label.setGeometry(QRect(35,190, 150,40))
+        self.Comment_label.setObjectName('comment_label')
+        self.Comment_label.setText('값을 조정 할 수 있습니다')
+        self.Comment_label.setFont(QFont('배달의민족 연성',12))
 
         # 도움말
         self.Help_button = QPushButton(self.centralwidget)
@@ -128,11 +128,11 @@ class Main_MainWindow(QWidget):
         self.Sponsor_button.clicked.connect(self.Sponsor_notice)
 
         # 출처
-        self.comment_label = QLabel(self.centralwidget)
-        self.comment_label.setGeometry(QRect(25,300, 150,20))
-        self.comment_label.setObjectName('comment_label')
-        self.comment_label.setText('mr-doosun.tistory.com')
-        self.comment_label.setFont(QFont('배달의민족 연성',12))
+        self.Made_label = QLabel(self.centralwidget)
+        self.Made_label.setGeometry(QRect(25,300, 150,20))
+        self.Made_label.setObjectName('Made_label')
+        self.Made_label.setText('mr-doosun.tistory.com')
+        self.Made_label.setFont(QFont('배달의민족 연성',12))
 
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setGeometry(QRect(0, 0, 800, 21))
